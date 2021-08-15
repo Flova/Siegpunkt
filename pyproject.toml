@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "siegpunkt"
 version = "0.1.0"
-description = "A simple scoreboard web app written purely in python"
+description = "A simple scoreboard web app written purely in Python"
 authors = ["Florian Vahl <florian@flova.de>"]
 license = "MIT"
 
