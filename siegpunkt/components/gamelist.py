@@ -98,7 +98,7 @@ class GameInfos(jp.Td):
         add_btn.on("click", add_player_cb)
         content.add(add_player)
         self.add(content)
-        
+
 
 class PersonEntry(jp.Div):
     def __init__(self, game, person, **kwargs):
@@ -121,7 +121,7 @@ class PersonEntry(jp.Div):
         plus_btn.on("click", inc)
 
         # Minus
-        minus_btn = jp.Div(classes="text-l p-2 rounded-lg bg-red-800 text-indigo-100 hover:bg-red-900 flex items-center px-4 py-2 leading-5 cursor-pointer", text="+")
+        minus_btn = jp.Div(classes="text-l p-2 rounded-lg bg-red-800 text-indigo-100 hover:bg-red-900 flex items-center px-4 py-2 leading-5 cursor-pointer", text="-")
         minus_btn.score_label = score_label
         def dec(self, msg):
             self.score_label.text = int(score_label.text) - 1
