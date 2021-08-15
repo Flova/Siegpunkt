@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "siegpunkt"
+version = "0.1.0"
+description = "A simple scoreboard web app written purely in python"
+authors = ["Florian Vahl <florian@flova.de>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+justpy = "^0.1.5"
+SQLAlchemy = "^1.4.22"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
