@@ -6,8 +6,9 @@ from siegpunkt.components.page import PageCanvas
 from siegpunkt.components.new_button import NewButton
 
 
+
 @jp.SetRoute('/games')
-def testpage(request):
+def gamepage(request):
     wp = jp.WebPage()
     wp.title = "Siegpunkt"
     wp.favicon = None
