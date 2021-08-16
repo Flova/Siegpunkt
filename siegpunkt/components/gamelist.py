@@ -1,6 +1,6 @@
 import justpy as jp
 from datetime import datetime
-from sqlalchemy import func
+from sqlalchemy import func, desc
 
 from siegpunkt.components.tag import Tag
 from siegpunkt.models import Game, User, Match, Session
@@ -46,7 +46,7 @@ class GameRow(jp.Tr):
             self.tags = [Tag(text=tag) for tag in game.tags.split(",")]
         else:
             self.tags = [Tag(text="Karten")]
-        self.num_games=0
+        self.num_games = s.query(Match).filter(Match.game==game).count()
 
         # Add game infos to table
         self.add_summary()
@@ -89,15 +89,15 @@ class GameInfos(jp.Td):
 
         # Add header which is clicked on close and displays the game name
         header = jp.Div(classes="flex justify-between hover:bg-gray-200 cursor-pointer", event_propagation=False)
-        header.add(jp.P(classes="px-6 p-4 text-xl whitespace-nowrap", text=self.game_name))
+        header.add(jp.P(classes="px-6 p-4 whitespace-nowrap", text=self.game_name))
         header.add(jp.parse_html('''<div class="p-4 flex items-center"> <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" class="w-5 h-5 align-right"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg></div>'''))
         header.on("click", on_close)
         self.add(header)
 
         # Add infos regarding this game
         content = jp.Div(classes="m-6 mt-2", event_propagation=False)
-        content.add(jp.P(classes="text-sm", text=f"Anahl Spiele: {s.query(Match).filter(Match.game==game).count()}"))
-        content.add(jp.P(classes="text-sm", text="Bester Spieler: Étienne"))
+        content.add(jp.P(classes="text-sm", text=f"Anzahl Spiele: {s.query(Match).filter(Match.game==game).count()}"))
+        content.add(jp.P(classes="text-sm", text=f"Bester Spieler: {s.query(User.name, func.sum(Match.score).label('mySum')).filter(Match.game==game).join(Match.player).group_by(User).order_by(desc('mySum')).first()[0]}"))
         content.add(jp.H3(classes="mt-4 mb-2 text-xl", text="Spieler"))
         content.add(jp.Hr())
 
