@@ -1,5 +1,11 @@
 import justpy as jp
+from datetime import datetime
+from sqlalchemy import func
+
 from siegpunkt.components.tag import Tag
+from siegpunkt.models import Game, User, Match, Session
+
+s = Session()
 
 list_html = """
 <div class="flex flex-col">
@@ -30,13 +36,16 @@ list_html = """
 </div>
 """
 
-class Game(jp.Tr):
-    def __init__(self, id=0, **kwargs):
+class GameRow(jp.Tr):
+    def __init__(self, game, **kwargs):
         super().__init__(**kwargs)
 
         # Set properties
-        self.game_title="Skat"
-        self.tags=[Tag(text="Karten"), Tag(text="64er Deck")]
+        self.game_title = game.name
+        if game.tags:
+            self.tags = [Tag(text=tag) for tag in game.tags.split(",")]
+        else:
+            self.tags = [Tag(text="Karten")]
         self.num_games=0
 
         # Add game infos to table
@@ -47,7 +56,7 @@ class Game(jp.Tr):
             if not isinstance(self.last(), GameInfos):
                 # Add GameInfos cell inside
                 self.delete_components()
-                self.add(GameInfos(id=0, on_close=self.add_summary))
+                self.add(GameInfos(game=game, on_close=self.add_summary))
                 self.classes = ""
 
         self.on("click", click_handle)
@@ -68,14 +77,15 @@ class Game(jp.Tr):
 
 
 class GameInfos(jp.Td):
-    def __init__(self, id, on_close, **kwargs):
+    def __init__(self, game, on_close, **kwargs):
         super().__init__(**kwargs)
 
         # Set name
-        self.game_name = "Doppelkopf"
+        self.game_name = game.name
 
         # Properties
         self.colspan = "3"
+        self.classes = "p-0"
 
         # Add header which is clicked on close and displays the game name
         header = jp.Div(classes="flex justify-between hover:bg-gray-200 cursor-pointer", event_propagation=False)
@@ -86,16 +96,15 @@ class GameInfos(jp.Td):
 
         # Add infos regarding this game
         content = jp.Div(classes="m-6 mt-2", event_propagation=False)
-        content.add(jp.P(classes="text-sm", text="Anahl Spiele: 4"))
+        content.add(jp.P(classes="text-sm", text=f"Anahl Spiele: {s.query(Match).filter(Match.game==game).count()}"))
         content.add(jp.P(classes="text-sm", text="Bester Spieler: Étienne"))
-        content.add(jp.P(classes="text-sm", text="Letzter Spieler: Étienne"))
         content.add(jp.H3(classes="mt-4 mb-2 text-xl", text="Spieler"))
         content.add(jp.Hr())
 
         # Add list of players including their scores
         players_div = jp.Div()
-        for person in ["Étienne", "Nick", "Flo"]:
-            players_div.add(PersonEntry(0, person))
+        for person in s.query(User).all():
+            players_div.add(PersonEntry(game, person))
         content.add(players_div)
 
         # Add input to add new players
@@ -106,7 +115,21 @@ class GameInfos(jp.Td):
         add_btn.players_div = players_div
 
         def add_player_cb(self, msg):
-            self.players_div.add(PersonEntry(0, self.input_field.value))
+            # Check if user with that name exists
+            if s.query(User).filter(User.name==self.input_field.value).count() == 0:
+                try:
+                    # Create user in db
+                    user = User(name=self.input_field.value, creation_date=datetime.now())
+                    s.add(user)
+                    s.commit()
+                except Exception as e:
+                    s.rollback()
+                    print(e)
+                # Add him to the component
+                self.players_div.add(PersonEntry(game, user))
+                # Clear input field
+                self.input_field.value = ""
+
         add_btn.on("click", add_player_cb)
         content.add(add_player)
 
@@ -121,24 +144,45 @@ class PersonEntry(jp.Div):
         self.classes="mt-2 mb-2 flex justify-between"
 
         # Name of the person
-        self.add(jp.P(classes="text-md flex items-center", text=person))
+        self.add(jp.P(classes="text-md flex items-center", text=person.name))
 
         # Counter component
+        def write_score_to_db(score):
+            # Write it to the db
+            try:
+                # Create user in db
+                user = Match(game=game, player=person, score=score, date=datetime.now())
+                s.add(user)
+                s.commit()
+            except Exception as e:
+                s.rollback()
+                print(e)
+
+        def inc(self, msg):
+            self.score_label.text = int(score_label.text) + 1
+            write_score_to_db(1)
+
+        def dec(self, msg):
+            self.score_label.text = int(score_label.text) - 1
+            write_score_to_db(-1)
+
         counter_div = jp.Div(classes="flex justify-between font-mono")
         # Score label
-        score_label = jp.Div(classes="text-l p-0 ml-4 mr-4 flex items-center leading-5", text=0)
+        if s.query(Match).filter(Match.game==game, Match.player==person).count():
+            score = int(s.query(Match).with_entities(func.sum(Match.score).label("mySum")).filter(Match.game==game, Match.player==person).first().mySum)
+        else:
+            score = 0
+        score_label = jp.Div(
+            classes="text-l p-0 ml-4 mr-4 flex items-center leading-5",
+            text=score)
         # Plus button
         plus_btn = jp.Div(classes="text-l p-2 rounded-lg bg-green-800 text-indigo-100 hover:bg-green-900 flex items-center px-4 py-2 leading-5 cursor-pointer", text="+")
         plus_btn.score_label = score_label
-        def inc(self, msg):
-            self.score_label.text = int(score_label.text) + 1
         plus_btn.on("click", inc)
 
         # Minus button
         minus_btn = jp.Div(classes="text-l p-2 rounded-lg bg-red-800 text-indigo-100 hover:bg-red-900 flex items-center px-4 py-2 leading-5 cursor-pointer", text="-")
         minus_btn.score_label = score_label
-        def dec(self, msg):
-            self.score_label.text = int(score_label.text) - 1
         minus_btn.on("click", dec)
 
         counter_div.add(minus_btn)
@@ -147,13 +191,11 @@ class PersonEntry(jp.Div):
         self.add(counter_div)
 
 
-
-
-
 class GameList(jp.Div):
-    def __init__(self, games=[], **kwargs):
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
         table = jp.parse_html(list_html, a=self)
-        games = [Game(i) for i in range(10)]
+        games = s.query(Game).all()
+        games = [GameRow(game_entry) for game_entry in games]
         for game in games:
             table.name_dict["game_list_body"].add(game)

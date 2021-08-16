@@ -9,6 +9,7 @@ license = "MIT"
 python = "^3.8"
 justpy = "^0.1.5"
 SQLAlchemy = "^1.4.22"
+alembic = "^1.6.5"
 
 [tool.poetry.dev-dependencies]
 

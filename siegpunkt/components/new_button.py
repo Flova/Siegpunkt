@@ -1,5 +1,12 @@
 import justpy as jp
 
+from datetime import datetime
+
+from siegpunkt.models import Game, Session
+
+# Database session
+s = Session()
+
 class NewButton(jp.Div):
     """
     Button componenet used to create new things on the top of a page of things
@@ -27,6 +34,15 @@ class NewButton(jp.Div):
                 """
                 Handles the submission of the naming form
                 """
+                # Create game in database
+                try:
+                    coupon = Game(name=self.input_field.value, creation_date=datetime.now())
+                    s.add(coupon)
+                    s.commit()
+                except Exception as e:
+                    #print(f"Noooo {e}")
+                    s.rollback()
+
                 # Clear the container / delete the form
                 parent_div.delete_components()
                 # Add the `New` button again
