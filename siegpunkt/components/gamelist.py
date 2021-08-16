@@ -72,7 +72,7 @@ class GameInfos(jp.Td):
         header.add(jp.parse_html('''<div class="p-4 flex items-center"> <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" class="w-5 h-5 align-right"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg></div>'''))
         header.on("click", on_close)
         self.add(header)
-        content = jp.Div(classes="m-6 mt-2 max-w-sm", event_propagation=False)
+        content = jp.Div(classes="m-6 mt-2", event_propagation=False)
         content.add(jp.P(classes="text-sm", text="Anahl Spiele: 4"))
         content.add(jp.P(classes="text-sm", text="Bester Spieler: Étienne"))
         content.add(jp.P(classes="text-sm", text="Letzter Spieler: Étienne"))
@@ -87,7 +87,7 @@ class GameInfos(jp.Td):
         content.add(players_div)
 
         add_player = jp.Div(classes="flex mt-4", event_propagation=False)
-        name_inp = jp.Input(a=add_player, classes="flex-grow-0 mr-4 bg-gray-200 border-2 border-gray-200 rounded w-64 py-2 px-4 text-gray-700 focus:outline-none focus:bg-white focus:border-purple-500", placeholder='Max Mustermann')
+        name_inp = jp.Input(a=add_player, classes="w-full mr-4 bg-gray-200 border-2 border-gray-200 rounded w-64 py-2 px-4 text-gray-700 focus:outline-none focus:bg-white focus:border-purple-500", placeholder='Max Mustermann')
         add_btn = jp.Div(a=add_player, classes="text-l p-2 rounded-lg bg-indigo-800 text-indigo-100 hover:bg-indigo-600 flex items-center px-4 py-2 leading-5 cursor-pointer", text="Hinzufügen")
         add_btn.input_field = name_inp
         add_btn.players_div = players_div

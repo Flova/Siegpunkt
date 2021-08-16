@@ -2,7 +2,7 @@ import justpy as jp
 
 canvas = """
 <div class="min-h-screen bg-gradient-to-b from-purple-500 to-indigo-500 flex items-center justify-center">
-    <div class="bg-white p-8 rounded-md mt-20 mb-20">
+    <div class="bg-white p-8 rounded-md mt-20 mb-20 w-4/12 shadow-2xl">
         <div name="header" class="flex justify-between mb-8">
             <h1 name="page_title" class="text-black-800 text-3xl"></h1>
         </div>
