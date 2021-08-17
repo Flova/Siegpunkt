@@ -6,7 +6,6 @@ from siegpunkt.components.page import PageCanvas
 from siegpunkt.components.new_button import NewButton
 
 
-@jp.SetRoute('/games')
 def gamepage(request):
     wp = jp.WebPage(
         # Add html header for responsive webdesign
@@ -30,4 +29,4 @@ def gamepage(request):
     can.add(gamelist)
     return wp
 
-jp.justpy()
+jp.justpy(gamepage)
