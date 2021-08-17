@@ -1,9 +1,14 @@
+import configparser
+
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy import Column, Integer, Float, String, DateTime, ForeignKey
 
-engine = create_engine('sqlite:////tmp/test.db')
+config = configparser.ConfigParser()
+config.read('alembic.ini')
+
+engine = create_engine(config['alembic']['sqlalchemy.url'])
 Base = declarative_base(bind=engine)
 Session = sessionmaker(bind=engine)
 
