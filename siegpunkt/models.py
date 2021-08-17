@@ -49,5 +49,3 @@ class Match(Base):
     player_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     player = relationship('User', backref='matches')
     score = Column(Float)
-
-Base.metadata.create_all()
