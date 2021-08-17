@@ -21,7 +21,7 @@ def gamepage(request):
 
     # Page properties
     wp.title = "Siegpunkt"
-    wp.favicon = None
+    wp.favicon = "img/favicon.png"
     wp.display_url = 'games'
 
     # Add main component
