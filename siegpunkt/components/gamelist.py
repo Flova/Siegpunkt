@@ -42,12 +42,12 @@ class GameRow(jp.Tr):
         super().__init__(**kwargs)
 
         # Set properties
-        self.game_title = game.name
+        self.game = game
+
         if game.tags:
             self.tags = [Tag(text=tag) for tag in game.tags.split(",")]
         else:
             self.tags = [Tag(text="Karten")]
-        self.num_games = s.query(Match).filter(Match.game==game).count()
 
         # Add game infos to table
         self.add_summary()
@@ -68,18 +68,25 @@ class GameRow(jp.Tr):
         # Add style
         self.classes = "hover:bg-gray-200 cursor-pointer"
         # Add game title
-        self.add(jp.Td(classes="px-6 py-4 whitespace-nowrap", text=self.game_title))
+        self.add(jp.Td(classes="px-6 py-4 whitespace-nowrap", text=self.game.name))
         # Add game tags
         cell = jp.Td(classes="px-6 py-4 whitespace-nowrap", a=self)
         for tag in self.tags:
             cell.add(tag)
         # Show number of games
-        self.add(jp.Td(classes="px-6 py-4 whitespace-nowrap", text=str(self.num_games)))
+        self.add(jp.Td(classes="px-6 py-4 whitespace-nowrap", text=str(s.query(Match).filter(Match.game==self.game).count())))
+
+    def react(self, data):
+        # Handle click if there isn't a GameInfos component inside
+        if not isinstance(self.last(), GameInfos):
+            self.add_summary()
 
 
 class GameInfos(jp.Td):
     def __init__(self, game, on_close, **kwargs):
         super().__init__(**kwargs)
+
+        self.game = game
 
         # Set name
         self.game_name = game.name
@@ -95,33 +102,25 @@ class GameInfos(jp.Td):
         header.on("click", on_close)
         self.add(header)
 
-        # Add infos regarding this game
         content = jp.Div(classes="m-6 mt-2", event_propagation=False)
-        content.add(jp.P(classes="text-sm", text=f"Anzahl Spiele: {s.query(Match).filter(Match.game==game).count()}"))
-        best_player = s.query(User.name, func.sum(Match.score).label('mySum')).filter(Match.game==game).join(Match.player).group_by(User).order_by(desc('mySum')).first()
-        if best_player:
-            content.add(jp.P(classes="text-sm", text=f"Bester Spieler: {best_player[0]}"))
+
+        # Add infos regarding this game
+        self.infos = jp.Div()
+        content.add(self.infos)
+
         content.add(jp.H3(classes="mt-4 mb-2 text-xl", text="Spieler"))
         content.add(jp.Hr())
 
         # Add list of players including their scores
-        players_div = jp.Div()
-        # The players which already played sorted by score
-        players_db = [x[0] for x in s.query(User, func.sum(Match.score).label('mySum')).filter(Match.game==game).join(Match.player).group_by(User).order_by(desc('mySum')).all()]
-        players_db.extend(s.query(User).all())
-        # Remove duplicates
-        players_db = list(dict.fromkeys(players_db))
-        # Add players
-        for person in players_db:
-            players_div.add(PersonEntry(game, person))
-        content.add(players_div)
+        self.players_div = jp.Div()
+        content.add(self.players_div)
 
         # Add input to add new players
         add_player = jp.Div(classes="flex mt-4", event_propagation=False)
-        name_inp = jp.Input(a=add_player, classes="w-full mr-4 bg-gray-200 border-2 border-gray-200 rounded w-64 py-2 px-4 text-gray-700 focus:outline-none focus:bg-white focus:border-purple-500", placeholder='Max Mustermann')
+        name_inp = jp.InputChangeOnly(a=add_player, classes="w-full mr-4 bg-gray-200 border-2 border-gray-200 rounded w-64 py-2 px-4 text-gray-700 focus:outline-none focus:bg-white focus:border-purple-500", placeholder='Max Mustermann')
         add_btn = jp.Div(a=add_player, classes="text-l p-2 rounded-lg bg-indigo-800 text-indigo-100 hover:bg-indigo-600 flex items-center px-4 py-2 leading-5 cursor-pointer", text="Hinzufügen")
         add_btn.input_field = name_inp
-        add_btn.players_div = players_div
+        add_btn.players_div = self.players_div
 
         def add_player_cb(self, msg):
             # Check if user with that name exists
@@ -144,6 +143,22 @@ class GameInfos(jp.Td):
 
         self.add(content)
 
+    def react(self, data):
+        # The players which already played sorted by score
+        players_db = [x[0] for x in s.query(User, func.sum(Match.score).label('mySum')).filter(Match.game==self.game).join(Match.player).group_by(User).order_by(desc('mySum')).all()]
+        players_db.extend(s.query(User).all())
+        # Remove duplicates
+        players_db = list(dict.fromkeys(players_db))
+        # Add players
+        self.players_div.delete_components()
+        for person in players_db:
+            self.players_div.add(PersonEntry(self.game, person))
+
+        self.infos.delete_components()
+        self.infos.add(jp.P(classes="text-sm", text=f"Anzahl Spiele: {s.query(Match).filter(Match.game==self.game).count()}"))
+        best_player = s.query(User.name, func.sum(Match.score).label('mySum')).filter(Match.game==self.game).join(Match.player).group_by(User).order_by(desc('mySum')).first()
+        if best_player:
+            self.infos.add(jp.P(classes="text-sm", text=f"Bester Spieler: {best_player[0]}"))
 
 class PersonEntry(jp.Div):
     def __init__(self, game, person, **kwargs):

@@ -54,7 +54,7 @@ class NewButton(jp.Div):
 
             # Create name form
             input_container = jp.Div(classes="flex justify-between", event_propagation=False)
-            name_input_field = jp.Input(a=input_container, classes="w-full mr-4 ml-6 bg-gray-200 border-2 border-gray-200 rounded w-64 py-2 px-4 text-gray-700 focus:outline-none focus:bg-white focus:border-purple-500", placeholder='Musterspiel')
+            name_input_field = jp.InputChangeOnly(a=input_container, classes="w-full mr-4 ml-6 bg-gray-200 border-2 border-gray-200 rounded w-64 py-2 px-4 text-gray-700 focus:outline-none focus:bg-white focus:border-purple-500", placeholder='Musterspiel')
             add_btn = jp.Div(a=input_container, classes="text-l p-2 rounded-lg bg-indigo-800 text-indigo-100 hover:bg-indigo-600 flex items-center px-4 py-2 leading-5 cursor-pointer", text="Hinzufügen")
             add_btn.input_field = name_input_field
             parent_div.add(input_container)
