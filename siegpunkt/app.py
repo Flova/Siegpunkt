@@ -25,8 +25,9 @@ def gamepage(request):
     wp.display_url = 'games'
 
     # Add main component
-    can = PageCanvas(a=wp, title="Spiele", header_btn=NewButton())
-    can.add(GameList())
+    gamelist = GameList()
+    can = PageCanvas(a=wp, title="Spiele", header_btn=NewButton(gamelists=[gamelist]))
+    can.add(gamelist)
     return wp
 
 jp.justpy()

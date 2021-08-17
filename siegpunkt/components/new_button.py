@@ -12,7 +12,7 @@ class NewButton(jp.Div):
     Button componenet used to create new things on the top of a page of things
     It consits of a new button that transforms into a input field if clicked.
     """
-    def __init__(self, text="Neu", **kwargs):
+    def __init__(self, text="Neu", gamelists=[], **kwargs):
         super().__init__(**kwargs)
         # Style
         self.classes = "flex"
@@ -36,11 +36,14 @@ class NewButton(jp.Div):
                 """
                 # Create game in database
                 try:
-                    coupon = Game(name=self.input_field.value, creation_date=datetime.now())
-                    s.add(coupon)
+                    game = Game(name=self.input_field.value, creation_date=datetime.now())
+                    s.add(game)
                     s.commit()
+
+                    for gamelist in gamelists:
+                        gamelist.add_game(game)
+
                 except Exception as e:
-                    #print(f"Noooo {e}")
                     s.rollback()
 
                 # Clear the container / delete the form

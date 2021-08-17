@@ -1,4 +1,5 @@
 import justpy as jp
+
 from datetime import datetime
 from sqlalchemy import func, desc
 
@@ -97,13 +98,21 @@ class GameInfos(jp.Td):
         # Add infos regarding this game
         content = jp.Div(classes="m-6 mt-2", event_propagation=False)
         content.add(jp.P(classes="text-sm", text=f"Anzahl Spiele: {s.query(Match).filter(Match.game==game).count()}"))
-        content.add(jp.P(classes="text-sm", text=f"Bester Spieler: {s.query(User.name, func.sum(Match.score).label('mySum')).filter(Match.game==game).join(Match.player).group_by(User).order_by(desc('mySum')).first()[0]}"))
+        best_player = s.query(User.name, func.sum(Match.score).label('mySum')).filter(Match.game==game).join(Match.player).group_by(User).order_by(desc('mySum')).first()
+        if best_player:
+            content.add(jp.P(classes="text-sm", text=f"Bester Spieler: {best_player[0]}"))
         content.add(jp.H3(classes="mt-4 mb-2 text-xl", text="Spieler"))
         content.add(jp.Hr())
 
         # Add list of players including their scores
         players_div = jp.Div()
-        for person in s.query(User).all():
+        # The players which already played sorted by score
+        players_db = [x[0] for x in s.query(User, func.sum(Match.score).label('mySum')).filter(Match.game==game).join(Match.player).group_by(User).order_by(desc('mySum')).all()]
+        players_db.extend(s.query(User).all())
+        # Remove duplicates
+        players_db = list(dict.fromkeys(players_db))
+        # Add players
+        for person in players_db:
             players_div.add(PersonEntry(game, person))
         content.add(players_div)
 
@@ -194,8 +203,16 @@ class PersonEntry(jp.Div):
 class GameList(jp.Div):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        table = jp.parse_html(list_html, a=self)
-        games = s.query(Game).all()
-        games = [GameRow(game_entry) for game_entry in games]
+        self.table = jp.parse_html(list_html, a=self)
+
+        games = [x[0] for x in s.query(Game, func.count(Match.id).label('mySum')).join(Match.game).group_by(Game).order_by(desc('mySum')).all()]
+        games.extend(s.query(Game).all())
+
+        # Remove duplicates
+        games = list(dict.fromkeys(games))
+
         for game in games:
-            table.name_dict["game_list_body"].add(game)
+            self.table.name_dict["game_list_body"].add(GameRow(game))
+
+    def add_game(self, game):
+        self.table.name_dict["game_list_body"].add(GameRow(game))
