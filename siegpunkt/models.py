@@ -1,3 +1,4 @@
+import os
 import configparser
 
 from sqlalchemy import create_engine
@@ -6,7 +7,7 @@ from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy import Column, Integer, Float, String, DateTime, ForeignKey
 
 config = configparser.ConfigParser()
-config.read('alembic.ini')
+config.read(os.path.join(os.path.dirname(__file__), 'alembic.ini'))
 
 engine = create_engine(config['alembic']['sqlalchemy.url'])
 Base = declarative_base(bind=engine)
