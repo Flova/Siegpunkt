@@ -27,4 +27,4 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
-            ghcr.io/Flova/Siegpunkt:latest
+            ghcr.io/flova/siegpunkt:latest
