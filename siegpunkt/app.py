@@ -29,4 +29,8 @@ def gamepage(request):
     can.add(gamelist)
     return wp
 
-jp.justpy(gamepage)
+
+if __name__ == '__main__':
+    jp.justpy(gamepage)
+else:
+    app = jp.justpy(gamepage, start_server=False)
