@@ -5,6 +5,7 @@ from siegpunkt.components.gamelist import GameList
 from siegpunkt.components.page import PageCanvas
 from siegpunkt.components.new_button import NewButton
 
+app = jp.app
 
 def gamepage(request):
     wp = jp.WebPage(
@@ -33,4 +34,4 @@ def gamepage(request):
 if __name__ == '__main__':
     jp.justpy(gamepage)
 else:
-    app = jp.justpy(gamepage, start_server=False)
+    jp.justpy(gamepage, start_server=False)
