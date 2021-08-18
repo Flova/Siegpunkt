@@ -10,4 +10,4 @@ RUN poetry install
 
 EXPOSE 8000
 
-CMD poetry run alembic upgrade head; poetry run uvicorn --host 0.0.0.0 --port 8000 app:app
+CMD poetry run alembic upgrade head; poetry run uvicorn --host 0.0.0.0 --port 8000 --proxy-headers app:app
