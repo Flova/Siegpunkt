@@ -6,6 +6,8 @@ WORKDIR /Siegpunkt/siegpunkt
 
 RUN pip install poetry
 
+RUN pip install --upgrade setuptools==57.4.0  # Fix for https://github.com/elimintz/justpy/issues/301
+
 RUN poetry install
 
 EXPOSE 8000
