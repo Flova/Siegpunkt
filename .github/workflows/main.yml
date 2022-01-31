@@ -1,8 +1,6 @@
 name: Docker Build
 
 on:
-  schedule: 
-    - cron: '30 17 */8 * *'
   push:
     branches:
       - 'master'
