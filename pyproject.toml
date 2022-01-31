@@ -7,8 +7,7 @@ license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.8"
-setuptools = "57.4.0"  # Fix for https://github.com/elimintz/justpy/issues/301
-justpy = "^0.1.5"
+justpy = "^0.2.3"
 SQLAlchemy = "^1.4.22"
 alembic = "^1.6.5"
 
